@@ -78,8 +78,9 @@ function Bookmarks() {
         post_id: bookmark.post.id,
       })
 
-      // Обновляем список закладок
-      fetchBookmarks()
+      // Обновляем список закладок локально
+      setBookmarks((prevBookmarks) => prevBookmarks.filter((b) => b.id !== bookmarkId))
+
       Toast('success', 'Bookmark removed successfully', '')
     } catch (error) {
       console.error('Error removing bookmark:', error)
