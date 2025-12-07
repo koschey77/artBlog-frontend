@@ -1,4 +1,6 @@
-import {Route, Routes, BrowserRouter} from 'react-router-dom'
+import {Route, Routes, BrowserRouter, useLocation} from 'react-router-dom'
+import {useEffect} from 'react'
+import {logPageView} from './utils/analytics'
 import Index from './views/core/Index'
 import Detail from './views/core/Detail'
 import Category from './views/core/Category'
@@ -21,40 +23,53 @@ import Notifications from './views/dashboard/Notifications'
 import Profile from './views/dashboard/Profile'
 import MainWrapper from '../src/layouts/MainWrapper'
 
+function AppRoutes() {
+  const location = useLocation()
+
+  // Отслеживание изменений маршрута
+  useEffect(() => {
+    logPageView(location.pathname + location.search)
+  }, [location])
+
+  return (
+    <MainWrapper>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/:slug/" element={<Detail />} />
+        <Route path="/category/:slug/" element={<Category />} />
+        <Route path="/authors/" element={<Authors />} />
+        <Route path="/author/:authorId/" element={<AuthorDetail />} />
+
+        {/* Authentication */}
+        <Route path="/register/" element={<Register />} />
+        <Route path="/login/" element={<Login />} />
+        <Route path="/logout/" element={<Logout />} />
+        <Route path="/forgot-password/" element={<ForgotPassword />} />
+        <Route path="/create-password/" element={<CreatePassword />} />
+
+        {/* Dashboard */}
+        <Route path="/dashboard/" element={<Dashboard />} />
+        <Route path="/posts/" element={<Posts />} />
+        <Route path="/bookmarks/" element={<Bookmarks />} />
+        <Route path="/add-post/" element={<AddPost />} />
+        <Route path="/edit-post/:id/" element={<EditPost />} />
+        <Route path="/comments/" element={<Comments />} />
+        <Route path="/notifications/" element={<Notifications />} />
+        <Route path="/profile/" element={<Profile />} />
+
+        {/* Pages */}
+        <Route path="/about/" element={<About />} />
+        <Route path="/contact/" element={<Contact />} />
+      </Routes>
+    </MainWrapper>
+  )
+}
+
 function App() {
   return (
     <>
       <BrowserRouter>
-        <MainWrapper>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/:slug/" element={<Detail />} />
-            <Route path="/category/:slug/" element={<Category />} />
-            <Route path="/authors/" element={<Authors />} />
-            <Route path="/author/:authorId/" element={<AuthorDetail />} />
-
-            {/* Authentication */}
-            <Route path="/register/" element={<Register />} />
-            <Route path="/login/" element={<Login />} />
-            <Route path="/logout/" element={<Logout />} />
-            <Route path="/forgot-password/" element={<ForgotPassword />} />
-            <Route path="/create-password/" element={<CreatePassword />} />
-
-            {/* Dashboard */}
-            <Route path="/dashboard/" element={<Dashboard />} />
-            <Route path="/posts/" element={<Posts />} />
-            <Route path="/bookmarks/" element={<Bookmarks />} />
-            <Route path="/add-post/" element={<AddPost />} />
-            <Route path="/edit-post/:id/" element={<EditPost />} />
-            <Route path="/comments/" element={<Comments />} />
-            <Route path="/notifications/" element={<Notifications />} />
-            <Route path="/profile/" element={<Profile />} />
-
-            {/* Pages */}
-            <Route path="/about/" element={<About />} />
-            <Route path="/contact/" element={<Contact />} />
-          </Routes>
-        </MainWrapper>
+        <AppRoutes />
       </BrowserRouter>
     </>
   )

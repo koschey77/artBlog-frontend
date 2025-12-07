@@ -8,6 +8,7 @@ import useUserData from '../../plugin/useUserData'
 import useAxios from '../../utils/useAxios'
 import {SERVER_URL} from '../../utils/constants'
 import getAvatarUrl from '../../utils/avatarHelper'
+import {trackPostView, trackPostComment} from '../../utils/analytics'
 
 import {Swiper, SwiperSlide} from 'swiper/react'
 import 'swiper/css' // импортируем основной CSS
@@ -19,7 +20,8 @@ import {Navigation, Pagination, EffectFade, Autoplay} from 'swiper/modules' // �
 function Detail() {
   const [post, setPost] = useState([])
   const [tags, setTags] = useState([])
-  const [createComment, setCreateComment] = useState({full_name: '', email: '', comment: ''})
+  const [createComment, setCreateComment] = useState({comment: ''})
+  const [userProfile, setUserProfile] = useState(null)
   const [modalImage, setModalImage] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const param = useParams()
@@ -42,9 +44,28 @@ function Detail() {
     }
   }
 
+  const fetchUserProfile = async () => {
+    if (userId) {
+      try {
+        const response = await axiosInstance.get(`user/profile/${userId}/`)
+        setUserProfile(response.data)
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      }
+    }
+  }
+
   useEffect(() => {
     fetchPost()
-  }, [])
+    fetchUserProfile()
+  }, [userId])
+
+  // Отслеживание просмотра поста
+  useEffect(() => {
+    if (post && post.id && post.title) {
+      trackPostView(post.id, post.title)
+    }
+  }, [post])
 
   const handleCreateCommentChange = (event) => {
     setCreateComment({
@@ -56,18 +77,27 @@ function Detail() {
   const handleCreateCommentSubmit = async (e) => {
     e.preventDefault()
 
+    // Проверка на пустой комментарий
+    if (!createComment.comment || createComment.comment.trim() === '') {
+      Toast('warning', 'Comment cannot be empty', 'Please write something before posting')
+      return
+    }
+
     const jsonData = {
       post_id: post?.id,
-      name: createComment.full_name,
-      email: createComment.email,
+      name: userProfile?.full_name || useUserData()?.username || 'Anonymous',
+      email: useUserData()?.email || 'no-email@example.com',
       comment: createComment.comment,
     }
     const response = await axiosInstance.post(`post/comment-post/`, jsonData)
+
+    if (response.status === 201) {
+      trackPostComment(post.id, post.title)
+    }
+
     fetchPost()
     Toast('success', 'Comment Posted.', '')
     setCreateComment({
-      full_name: '',
-      email: '',
       comment: '',
     })
   }
@@ -604,36 +634,46 @@ function Detail() {
 
               {/* Comments END */}
               {/* Reply START */}
-              <div className="bg-light p-3 rounded">
-                <h3 className="fw-bold">Leave a reply</h3>
-                <small>Your email address will not be published. Required fields are marked *</small>
-                <form className="row g-3 mt-2" onSubmit={handleCreateCommentSubmit}>
-                  <div className="col-md-6">
-                    <label className="form-label">Name *</label>
-                    <input
-                      onChange={handleCreateCommentChange}
-                      name="full_name"
-                      value={createComment.full_name}
-                      type="text"
-                      className="form-control"
-                      aria-label="First name"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Email *</label>
-                    <input onChange={handleCreateCommentChange} name="email" value={createComment.email} type="email" className="form-control" />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label">Write Comment *</label>
-                    <textarea onChange={handleCreateCommentChange} name="comment" value={createComment.comment} className="form-control" rows={4} />
-                  </div>
-                  <div className="col-12">
-                    <button type="submit" className="btn btn-primary">
-                      Post comment <i className="fas fa-paper-plane"></i>
-                    </button>
-                  </div>
-                </form>
-              </div>
+              {userId ? (
+                <div className="bg-light p-3 rounded">
+                  <h3 className="fw-bold">Leave a reply</h3>
+                  <p className="text-muted">
+                    <small>
+                      Commenting as <strong>{userProfile?.full_name || useUserData()?.username || 'User'}</strong>
+                    </small>
+                  </p>
+                  <form className="row g-3 mt-2" onSubmit={handleCreateCommentSubmit}>
+                    <div className="col-12">
+                      <label className="form-label">Write Comment *</label>
+                      <textarea
+                        onChange={handleCreateCommentChange}
+                        name="comment"
+                        value={createComment.comment}
+                        className="form-control"
+                        rows={4}
+                        placeholder="Share your thoughts..."
+                      />
+                    </div>
+                    <div className="col-12">
+                      <button type="submit" className="btn btn-primary">
+                        Post comment <i className="fas fa-paper-plane"></i>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              ) : (
+                <div className="bg-light p-3 rounded text-center">
+                  <h3 className="fw-bold">Leave a reply</h3>
+                  <p className="text-muted mt-3">
+                    <i className="fas fa-lock me-2"></i>
+                    Please{' '}
+                    <Link to="/login" className="text-primary fw-bold">
+                      log in
+                    </Link>{' '}
+                    to leave a comment
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

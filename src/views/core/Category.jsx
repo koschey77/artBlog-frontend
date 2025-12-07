@@ -108,7 +108,20 @@ function Category() {
         post_id: p.id,
       }
       const response = await axiosInstance.post(`post/like-post/`, jsonData)
-      fetchPosts()
+
+      // Обновляем только конкретный пост локально
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === p.id
+            ? {
+                ...post,
+                is_liked: !post.is_liked,
+                likes: post.is_liked ? post.likes.filter((like) => like.user !== userId) : [...post.likes, {user: userId}],
+              }
+            : post
+        )
+      )
+
       Toast('success', response.data.message, '')
     } catch (error) {
       console.error('Error liking post:', error)
@@ -132,7 +145,10 @@ function Category() {
         post_id: p.id,
       }
       const response = await axiosInstance.post(`post/bookmark-post/`, jsonData)
-      fetchPosts()
+
+      // Обновляем только конкретный пост локально
+      setPosts((prevPosts) => prevPosts.map((post) => (post.id === p.id ? {...post, is_bookmarked: !post.is_bookmarked} : post)))
+
       Toast('success', response.data.message, '')
     } catch (error) {
       console.error('Error bookmarking post:', error)

@@ -5,6 +5,7 @@ import {useParams, Link, useNavigate} from 'react-router-dom'
 
 import {useAuthStore} from '../../store/auth'
 import {register} from '../../utils/auth'
+import {trackUserRegistration} from '../../utils/analytics'
 
 function Register() {
   const [bioData, setBioData] = useState({full_name: '', email: '', password: '', password2: ''})
@@ -37,6 +38,8 @@ function Register() {
       alert(JSON.stringify(error))
       resetForm()
     } else {
+      // Отслеживание успешной регистрации
+      trackUserRegistration()
       navigate('/')
     }
 

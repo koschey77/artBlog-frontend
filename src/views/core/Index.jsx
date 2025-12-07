@@ -9,6 +9,7 @@ import useAxios from '../../utils/useAxios'
 import usePagination from '../../utils/usePagination'
 import PaginationComponent from '../../components/PaginationComponent'
 import {useAuthStore} from '../../store/auth'
+import {trackPostLike, trackPostBookmark, trackCategoryView, trackSearch} from '../../utils/analytics'
 
 function Index() {
   const [searchParams] = useSearchParams()
@@ -201,7 +202,23 @@ function Index() {
         post_id: p.id,
       }
       const response = await axiosInstance.post(`post/like-post/`, jsonData)
-      fetchPosts()
+
+      // Обновляем только конкретный пост локально
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === p.id
+            ? {
+                ...post,
+                is_liked: !post.is_liked,
+                likes: post.is_liked ? post.likes.filter((like) => like.user !== userId) : [...post.likes, {user: userId}],
+              }
+            : post
+        )
+      )
+
+      // Отслеживание лайка
+      trackPostLike(p.id, p.title)
+
       Toast('success', response.data.message, '')
     } catch (error) {
       console.error('Error liking post:', error)
@@ -225,7 +242,13 @@ function Index() {
         post_id: p.id,
       }
       const response = await axiosInstance.post(`post/bookmark-post/`, jsonData)
-      fetchPosts()
+
+      // Обновляем только конкретный пост локально
+      setPosts((prevPosts) => prevPosts.map((post) => (post.id === p.id ? {...post, is_bookmarked: !post.is_bookmarked} : post)))
+
+      // Отслеживание закладки
+      trackPostBookmark(p.id, p.title)
+
       Toast('success', response.data.message, '')
     } catch (error) {
       console.error('Error bookmarking post:', error)

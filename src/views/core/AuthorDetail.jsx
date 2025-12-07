@@ -115,7 +115,20 @@ function AuthorDetail() {
         post_id: post.id,
       }
       await axiosInstance.post(`post/like-post/`, jsonData)
-      fetchAuthorData() // Refresh data
+
+      // Обновляем только конкретный пост локально
+      setAuthorPosts((prevPosts) =>
+        prevPosts.map((p) =>
+          p.id === post.id
+            ? {
+                ...p,
+                is_liked: !p.is_liked,
+                likes: p.is_liked ? p.likes.filter((like) => like.user !== userId) : [...p.likes, {user: userId}],
+              }
+            : p
+        )
+      )
+
       Toast('success', 'Post liked successfully', '')
     } catch (error) {
       console.error('Error liking post:', error)
@@ -135,7 +148,10 @@ function AuthorDetail() {
         post_id: post.id,
       }
       await axiosInstance.post(`post/bookmark-post/`, jsonData)
-      fetchAuthorData() // Refresh data
+
+      // Обновляем только конкретный пост локально
+      setAuthorPosts((prevPosts) => prevPosts.map((p) => (p.id === post.id ? {...p, is_bookmarked: !p.is_bookmarked} : p)))
+
       Toast('success', 'Bookmark updated successfully', '')
     } catch (error) {
       console.error('Error bookmarking post:', error)
