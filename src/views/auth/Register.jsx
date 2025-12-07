@@ -40,7 +40,7 @@ function Register() {
     } else {
       // Получаем данные пользователя после успешной регистрации
       const userData = useAuthStore.getState().allUserData
-      
+
       // Отслеживание успешной регистрации с данными пользователя
       trackUserRegistration(userData)
       navigate('/')

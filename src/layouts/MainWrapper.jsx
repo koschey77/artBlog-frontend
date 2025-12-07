@@ -19,7 +19,7 @@ const MainWrapper = ({children}) => {
 
         // Perform an asynchronous user authentication action
         await setUser()
-        
+
         // Устанавливаем пользовательские данные в GA после аутентификации
         const userData = useAuthStore.getState().allUserData
         if (userData) {

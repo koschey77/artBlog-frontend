@@ -38,7 +38,7 @@ function Login() {
     } else {
       // Получаем данные пользователя после успешного входа
       const userData = useAuthStore.getState().allUserData
-      
+
       // Отслеживание успешного входа с данными пользователя
       trackUserLogin(userData)
       navigate('/')
