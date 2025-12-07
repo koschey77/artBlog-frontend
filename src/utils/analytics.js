@@ -4,6 +4,20 @@ import ReactGA from 'react-ga4'
 const TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID
 const isProduction = import.meta.env.NODE_ENV === 'production'
 
+// Создание безопасного хэша для email
+const hashEmail = (email) => {
+  if (!email) return 'anonymous'
+
+  // Простой хэш для демонстрации (в реальном проекте используйте более безопасные методы)
+  let hash = 0
+  for (let i = 0; i < email.length; i++) {
+    const char = email.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  return `user_${Math.abs(hash)}`
+}
+
 export const initGA = () => {
   console.log('Initializing GA with ID:', TRACKING_ID, 'Production mode:', isProduction)
 
@@ -43,10 +57,11 @@ export const setUserData = (user) => {
 
     // Отправка пользовательских данных
     ReactGA.event('user_data', {
-      user_email: user.email,
+      user_email_hash: hashEmail(user.email), // Хэшированный email вместо прямого
       user_name: user.username || user.first_name,
       user_id: userId,
       user_type: 'registered',
+      user_domain: user.email ? user.email.split('@')[1] : 'unknown', // Домен email (безопасно)
     })
   }
 }
@@ -97,9 +112,10 @@ export const trackPostView = (postId, postTitle, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
@@ -110,9 +126,10 @@ export const trackPostLike = (postId, postTitle, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
@@ -123,9 +140,10 @@ export const trackPostComment = (postId, postTitle, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
@@ -136,9 +154,10 @@ export const trackPostBookmark = (postId, postTitle, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
@@ -149,9 +168,10 @@ export const trackUserRegistration = (user) => {
   if (user) {
     const userId = user.user_id || user.id
     const userParams = {
-      user_email: user.email,
+      user_email_hash: hashEmail(user.email),
       user_name: user.username || user.first_name,
       user_id: userId,
+      user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       registration_method: 'email',
     }
     logEvent('User', 'Registration', 'New User', userId, userParams)
@@ -165,14 +185,15 @@ export const trackUserLogin = (user) => {
   if (user) {
     const userId = user.user_id || user.id
     const userParams = {
-      user_email: user.email,
+      user_email_hash: hashEmail(user.email),
       user_name: user.username || user.first_name,
       user_id: userId,
+      user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       login_method: 'email',
     }
     logEvent('User', 'Login', 'User Login', userId, userParams)
 
-    // Устанавливаем пользовательские данные после входа
+    // Устанавливаем пользовательские даннюе после входа
     setUserData(user)
   }
 }
@@ -188,9 +209,10 @@ export const trackSearch = (searchTerm, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
@@ -201,9 +223,10 @@ export const trackCategoryView = (categoryName, user = null) => {
   const userId = user ? user.user_id || user.id : null
   const userParams = user
     ? {
-        user_email: user.email,
+        user_email_hash: hashEmail(user.email),
         user_name: user.username || user.first_name,
         user_id: userId,
+        user_domain: user.email ? user.email.split('@')[1] : 'unknown',
       }
     : {user_type: 'anonymous'}
 
