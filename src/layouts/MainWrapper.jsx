@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import {setUser} from '../utils/auth'
 import {useAuthStore} from '../store/auth'
+import {setUserData} from '../utils/analytics'
 
 const MainWrapper = ({children}) => {
   // Initialize the 'loading' state variable and set its initial value to 'true'
@@ -18,6 +19,12 @@ const MainWrapper = ({children}) => {
 
         // Perform an asynchronous user authentication action
         await setUser()
+        
+        // Устанавливаем пользовательские данные в GA после аутентификации
+        const userData = useAuthStore.getState().allUserData
+        if (userData) {
+          setUserData(userData)
+        }
       } catch (error) {
         console.error('Error during authentication setup:', error)
       } finally {

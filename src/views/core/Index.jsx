@@ -29,7 +29,8 @@ function Index() {
     sort_by: 'newest',
   })
 
-  const userId = useUserData()?.user_id
+  const userData = useUserData()
+  const userId = userData?.user_id
   const axiosInstance = useAxios()
   const authLoading = useAuthStore((state) => state.loading)
 
@@ -216,8 +217,8 @@ function Index() {
         )
       )
 
-      // Отслеживание лайка
-      trackPostLike(p.id, p.title)
+      // Отслеживание лайка с данными пользователя
+      trackPostLike(p.id, p.title, userData)
 
       Toast('success', response.data.message, '')
     } catch (error) {
@@ -246,8 +247,8 @@ function Index() {
       // Обновляем только конкретный пост локально
       setPosts((prevPosts) => prevPosts.map((post) => (post.id === p.id ? {...post, is_bookmarked: !post.is_bookmarked} : post)))
 
-      // Отслеживание закладки
-      trackPostBookmark(p.id, p.title)
+      // Отслеживание закладки с данными пользователя
+      trackPostBookmark(p.id, p.title, userData)
 
       Toast('success', response.data.message, '')
     } catch (error) {

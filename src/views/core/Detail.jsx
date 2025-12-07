@@ -25,7 +25,8 @@ function Detail() {
   const [modalImage, setModalImage] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const param = useParams()
-  const userId = useUserData()?.user_id
+  const userData = useUserData()
+  const userId = userData?.user_id
 
   const axiosInstance = useAxios()
 
@@ -63,9 +64,9 @@ function Detail() {
   // Отслеживание просмотра поста
   useEffect(() => {
     if (post && post.id && post.title) {
-      trackPostView(post.id, post.title)
+      trackPostView(post.id, post.title, userData)
     }
-  }, [post])
+  }, [post, userData])
 
   const handleCreateCommentChange = (event) => {
     setCreateComment({
@@ -92,7 +93,7 @@ function Detail() {
     const response = await axiosInstance.post(`post/comment-post/`, jsonData)
 
     if (response.status === 201) {
-      trackPostComment(post.id, post.title)
+      trackPostComment(post.id, post.title, userData)
     }
 
     fetchPost()

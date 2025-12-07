@@ -3,9 +3,12 @@ import Header from '../partials/Header'
 import Footer from '../partials/Footer'
 import {Link} from 'react-router-dom'
 import {logout} from '../../utils/auth'
+import {trackUserLogout} from '../../utils/analytics'
 
 function Logout() {
   useEffect(() => {
+    // Отслеживание выхода пользователя
+    trackUserLogout()
     logout()
   }, [])
 

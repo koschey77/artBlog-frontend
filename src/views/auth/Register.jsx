@@ -38,8 +38,11 @@ function Register() {
       alert(JSON.stringify(error))
       resetForm()
     } else {
-      // Отслеживание успешной регистрации
-      trackUserRegistration()
+      // Получаем данные пользователя после успешной регистрации
+      const userData = useAuthStore.getState().allUserData
+      
+      // Отслеживание успешной регистрации с данными пользователя
+      trackUserRegistration(userData)
       navigate('/')
     }
 

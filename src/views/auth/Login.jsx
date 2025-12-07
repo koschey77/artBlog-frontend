@@ -36,8 +36,11 @@ function Login() {
       alert(JSON.stringify(error))
       resetForm()
     } else {
-      // Отслеживание успешного входа
-      trackUserLogin()
+      // Получаем данные пользователя после успешного входа
+      const userData = useAuthStore.getState().allUserData
+      
+      // Отслеживание успешного входа с данными пользователя
+      trackUserLogin(userData)
       navigate('/')
     }
 
