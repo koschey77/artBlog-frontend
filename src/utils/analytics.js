@@ -5,36 +5,44 @@ const TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID
 const isProduction = import.meta.env.NODE_ENV === 'production'
 
 export const initGA = () => {
-  if (TRACKING_ID && isProduction) {
+  console.log('Initializing GA with ID:', TRACKING_ID, 'Production mode:', isProduction)
+
+  if (TRACKING_ID) {
     ReactGA.initialize(TRACKING_ID, {
-      debug: false, // Включите для отладки в dev режиме
+      debug: !isProduction, // Отладка включена в dev режиме
     })
-    console.log('Google Analytics initialized')
+    console.log('Google Analytics initialized successfully with ID:', TRACKING_ID)
   } else {
-    console.log('Google Analytics not initialized (dev mode or missing ID)')
+    console.log('Google Analytics not initialized - missing TRACKING_ID')
   }
 }
 
 // Отслеживание просмотров страниц
 export const logPageView = (path) => {
-  if (TRACKING_ID && isProduction) {
+  if (TRACKING_ID) {
+    console.log('Tracking pageview:', path, document.title)
     ReactGA.send({
       hitType: 'pageview',
       page: path,
       title: document.title,
     })
+  } else {
+    console.log('Pageview not tracked - missing TRACKING_ID')
   }
 }
 
 // Отслеживание событий
 export const logEvent = (category, action, label = '', value = 0) => {
-  if (TRACKING_ID && isProduction) {
+  if (TRACKING_ID) {
+    console.log('Tracking event:', {category, action, label, value})
     ReactGA.event({
       category,
       action,
       label,
       value,
     })
+  } else {
+    console.log('Event not tracked - missing TRACKING_ID')
   }
 }
 
